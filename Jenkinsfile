@@ -1,33 +1,20 @@
-pipeline {
-    agent any
+pipeline { 
+ agent any 
+ environment { 
+ // Set JAVA_HOME to the path of your Java 17 installation 
+ JAVA_HOME = 'C:\Program Files\Java\jdk-21' 
+ // Add Java bin directory to PATH 
+ PATH = "${JAVA_HOME}\\bin;${env.PATH}" 
+ } 
+ tools { 
+ maven 'maven' 
+ } 
+ stages { 
+ stage('GetCode') { 
+ steps { 
+ git branch: 'main', url: 'https://github.com/kingtheraja/kingthearaja.git' 
+ } 
+ } 
 
-    tools {
-        // Install the Maven version configured as "M3" and add it to the path.
-         bat 'java -version' 
-         bat 'mvn --version' 
-    }
-
-    stages {
-        stage('Build') {
-            steps {
-                // Get some code from a GitHub repository
-                git 'https://github.com/kingtheraja/kingthearaja.git'
-
-                // Run Maven on a Unix agent.
-                sh "mvn -Dmaven.test.failure.ignore=true clean package"
-
-                // To run Maven on a Windows agent, use
-                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
-            }
-
-            post {
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
-                success {
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts 'target/*.jar'
-                }
-            }
-        }
-    }
+ } 
 }
