@@ -1,32 +1,50 @@
 pipeline {
     agent any
 
-    tools {
-        // Install the Maven version configured as "M3" and add it to the path.
-        maven "maven"
-    }
-
     stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the source code
+                git 'https://github.com/kingtheraja/kingthearaja.git'
+            }
+        }
+        
         stage('Build') {
             steps {
-                // Get some code from a GitHub repository
-                git 'https://github.com/jglick/simple-maven-project-with-tests.git'
-
-                // Run Maven on a Unix agent.
-                sh "mvn -Dmaven.test.failure.ignore=true clean package"
-
-                // To run Maven on a Windows agent, use
-                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
+                // Build the project using Maven
+                bat 'mvn clean install'
             }
+        }
 
-            post {
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
-                success {
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts 'target/*.jar'
-                }
+        stage('Test') {
+            steps {
+                // Run tests using Maven
+                bat 'mvn test'
             }
+        }
+
+        stage('Package') {
+            steps {
+                // Package the project (if needed)
+                bat 'mvn package'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Deploy the project (customize this for your needs)
+                echo 'Deploying...'
+                // e.g., bat 'scp target/my-app.jar user@server:/path/to/deploy'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
